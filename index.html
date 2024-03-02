@@ -74,6 +74,11 @@
     </style>
 </head>
 <body>
+    <select onchange="setMode(this)">
+        <option value="0" selected="selected">Local</option>
+        <option value="1">Random</option>
+        <!-- <option value="2">Tailored Random</option> -->
+    </select>
     <div id="query_div" class="query"></div>
     <div id="text_div" class="ufcp-text"></div>
     <div id="keyboard_div" class="ufcp-bg"></div>
@@ -121,7 +126,7 @@
     var index = 0;
     var char_base = 65;
     var queries = icao.concat(callsigns);
-
+    var mode = 0; // 0: random known, 1: true random, 2: custom random
     query_div.innerText = getNextQuery();
 
     for(row = 0; row < 3; row++) {
@@ -133,15 +138,39 @@
         keyboard_div.appendChild(row_div);
     }
 
+    function setMode(selectObject) {
+        mode = parseInt(selectObject.value);
+        query_div.innerText = getNextQuery();
+    }
+ 
+
     function getQueryOptions() {
         return icao.concat(callsigns);
     }
 
     function getNextQuery() {
-        if (queries.length == 0) {
-            queries = getQueryOptions();
-        } 
-        return queries.splice(Math.floor(Math.random()*queries.length), 1);
+        switch(mode) {
+            case 0:
+                if (queries.length == 0) {
+                    queries = getQueryOptions();
+                } 
+                return queries.splice(Math.floor(Math.random()*queries.length), 1);
+                break;
+            case 1:
+                const query_length = Math.random()*3 + 2;
+                var query = "";
+                for(i = 0; i < query_length; i++) {
+                    const character = String.fromCharCode(Math.random() * 26 + 65);
+                    query = query.concat(character);
+                }
+                return query;
+                break;
+            case 2:
+
+                break;
+            default:
+                return "ZZZZ";
+        }
     }
 
     function sleep(ms) {
