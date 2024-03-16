@@ -1,0 +1,20 @@
+.a-button {
+    font: bold 1rem Arial;
+    text-decoration: none;
+    background-color: #d6d6d6;
+    color: #333333;
+    padding: 2px 6px 2px 6px;
+    border-radius: 0.5rem;
+    display: block;
+    width: fit-content;
+    margin: auto;
+    margin-top: 0.5rem;
+}
+
+.a-button:hover {
+    background-color: #c4c4c4;
+}
+
+.a-button:active {
+    background-color: #EEEEEE;
+}
