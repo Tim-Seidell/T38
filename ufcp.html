@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFCP</title>
+    <style>
+        body {
+            touch-action: manipulation;
+        }
+
+        .ufcp-button {
+            background-color: rgb(133, 133, 133);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            text-align: center;
+            border-radius: 0.25rem;
+            font-family: arial;
+            display: inline-flex;
+            justify-content: center;
+            align-content: center;
+            flex-direction: column;
+            margin: 0.35rem;
+            font-size: 1.3rem;
+        }
+
+        .ufcp-button:active {
+            background-color: rgb(177, 177, 177);
+        }
+
+        .ufcp-bg {
+            background-color: black;
+            border-radius: 0.5rem;
+            width: fit-content;
+            padding: 0.5rem;
+            margin: auto;
+        }
+
+        .noselect {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome, Edge, Opera and Firefox */
+        }
+
+        .ufcp-text {
+            background-color: black;
+            color: greenyellow;
+            font-family: Arial;
+            width: 10rem;
+            height: 2rem;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            flex-direction: column;
+        }
+
+        .query {
+            width: 10rem;
+            margin: auto;
+            font-family: arial;
+            font-size: 2rem;
+        }
+
+        .a-button {
+            font: bold 11px Arial;
+            text-decoration: none;
+            background-color: #EEEEEE;
+            color: #333333;
+            padding: 2px 6px 2px 6px;
+            border-top: 1px solid #CCCCCC;
+            border-right: 1px solid #333333;
+            border-bottom: 1px solid #333333;
+            border-left: 1px solid #CCCCCC;
+            display: block;
+            width: fit-content;
+        }
+    </style>
+</head>
+<body>
+    <a class="a-button" href="index.html">Back</a>
+    <select onchange="setMode(this)">
+        <option value="0" selected="selected">Local</option>
+        <option value="1">Random</option>
+        <!-- <option value="2">Tailored Random</option> -->
+    </select>
+    <div id="query_div" class="query"></div>
+    <div id="text_div" class="ufcp-text"></div>
+    <div id="keyboard_div" class="ufcp-bg"></div>
+</body>
+<script>
+    const icao = [
+        "KDLF",
+        "KSJT",
+        "KSKF",
+        "KMAF"
+    ];
+
+    const callsigns = [
+        "BULLY",
+        "JUMP",
+        "BOXER",
+        "VADER",
+        "TARUS",
+        "TAURS",
+        "ARCO",
+        "OCTNE",
+        "COOL",
+        "NAPLM",
+        "STRKE",
+        "SUNDG",
+        "FIEND",
+        "GLOCK",
+        "SPIKR",
+        "WIRE",
+        "GRIM",
+        "CARBN",
+        "NASCR",
+        "STEER",
+        "FLANK",
+        "EXCEL",
+        "RATLR",
+        "RANCD",
+        "RBEYE"
+    ];
+
+
+    const keyboard_div = document.getElementById("keyboard_div");
+    const text_div = document.getElementById("text_div");
+    const query_div = document.getElementById("query_div");
+    var index = 0;
+    var char_base = 65;
+    var queries = icao.concat(callsigns);
+    var mode = 0; // 0: random known, 1: true random, 2: custom random
+    query_div.innerText = getNextQuery();
+
+    for(row = 0; row < 3; row++) {
+        var row_div = document.createElement("div");
+        for (col = 0; col < 9; col++) {
+            makeButton(String.fromCharCode(char_base + col), row_div, text_div);
+        }
+        char_base += 9;
+        keyboard_div.appendChild(row_div);
+    }
+
+    function setMode(selectObject) {
+        mode = parseInt(selectObject.value);
+        query_div.innerText = getNextQuery();
+    }
+ 
+
+    function getQueryOptions() {
+        return icao.concat(callsigns);
+    }
+
+    function getNextQuery() {
+        switch(mode) {
+            case 0:
+                if (queries.length == 0) {
+                    queries = getQueryOptions();
+                } 
+                return queries.splice(Math.floor(Math.random()*queries.length), 1);
+                break;
+            case 1:
+                const query_length = Math.random()*3 + 2;
+                var query = "";
+                for(i = 0; i < query_length; i++) {
+                    const character = String.fromCharCode(Math.random() * 26 + 65);
+                    query = query.concat(character);
+                }
+                return query;
+                break;
+            case 2:
+
+                break;
+            default:
+                return "ZZZZ";
+        }
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function checkEntry() {
+        const query_text = query_div.innerText;
+        const text_text = text_div.innerText;
+        const query_length = query_text.length;
+        const text_length = text_text.length;
+        if (query_length == text_length) {
+            if(query_text != text_text) {
+                console.log("Wrong!");
+            } else {
+                console.log("Right!");
+                query_div.innerText = getNextQuery();
+            }
+            sleep(500).then(() => { text_div.innerText = ""; });
+        }
+    }
+
+    function makeButton(character, parent, text_div) {
+        var button = document.createElement("div");
+        button.innerText = character == "[" ? "SP" : character;
+        button.className = "ufcp-button noselect";
+        button.onclick = function() {
+            text_div.innerText = text_div.innerText + button.innerText;
+            checkEntry();
+        };
+        parent.appendChild(button);
+    }    
+</script>
+</html>

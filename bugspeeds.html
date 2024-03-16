@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Speeds</title>
+
+    <style>
+        .a-button {
+            font: bold 11px Arial;
+            text-decoration: none;
+            background-color: #EEEEEE;
+            color: #333333;
+            padding: 2px 6px 2px 6px;
+            border-top: 1px solid #CCCCCC;
+            border-right: 1px solid #333333;
+            border-bottom: 1px solid #333333;
+            border-left: 1px solid #CCCCCC;
+            display: block;
+            width: fit-content;
+        }
+    </style>
+</head>
+<body>
+    <a class="a-button" href="index.html">Back</a>
+    <input type="checkbox" id="no_flap">
+    <label for="no_flap"> No Flap</label><br>
+    <input type="checkbox" id="gust" onclick="toggleGust()">
+    <label for="gust"> Gust</label><br>
+    
+    <div style="display: inline;">Max fuel</div>
+    <input style="width: 2.5rem;" id="max_fuel" type="text" value="2500"><br>
+    <div style="display: inline;">Min fuel</div>
+    <input style="width: 2.5rem;" id="min_fuel" type="text" value="800">
+
+    <div style="width: fit-content; margin: auto; align-content: center">
+        <div id="wind" style="display: none;"></div>
+
+        <div id="fuel"></div>
+        
+        <div>
+            <div style="display: inline;">Green: </div>
+            <div id="green" style="display: inline;"></div>
+        </div>
+        
+        <div>
+            <div style="display: inline;">Yellow: </div>
+            <div id="yellow" style="display: inline;"></div>
+        </div>
+    
+        <button style="font-size: 1.5rem;" id="next_button" onclick="revealSpeeds()">Next</button>
+    </div>
+
+</body>
+<script>
+    var no_flap_checkbox = document.getElementById("no_flap");
+    var gust_checked = document.getElementById("gust");
+
+    const wind_div = document.getElementById("wind");
+
+    const fuel_div = document.getElementById("fuel");
+    const green_div = document.getElementById("green");
+    const yellow_div = document.getElementById("yellow");
+
+    var wind = 0;
+    var gust = 0;
+
+    var fuel = randomFuel();
+    wind_div.innerText = "130" + pad(wind, 2) + "G" + pad(gust, 2) + "KT";
+    fuel_div.innerText = "Fuel: " + fuel;
+
+    var reveal = true;
+
+    function randomFuel() {
+        const max_fuel = parseInt(document.getElementById("max_fuel").value);
+        const min_fuel = parseInt(document.getElementById("min_fuel").value);
+        const fuel_range = max_fuel - min_fuel;
+        const random_fuel = Math.ceil(Math.floor(Math.random() * fuel_range) / 10) * 10;
+
+        // Random winds
+        wind = Math.floor(Math.random() * 20);
+        var gust_range = Math.floor(Math.random() * 10) + 5;
+        gust = wind + gust_range;
+
+        return random_fuel + min_fuel;
+    }
+
+    function revealSpeeds() {
+        if(reveal) {
+            var green_knots = 0;
+            if (no_flap_checkbox.checked) {
+                green_knots = clamp(165 + Math.round(fuel / 100), 165, 224);
+            } else {
+                green_knots = clamp(150 + Math.round(fuel / 100), 160, 209);
+            }
+
+            var gust_spread = gust_checked.checked ? Math.ceil((gust - wind)/2) : 0;
+            green_div.innerText = green_knots + gust_spread;
+            yellow_div.innerText = green_knots + 20;
+            reveal = false;
+        } else {
+            fuel = randomFuel();
+            wind_div.innerText = "130" + pad(wind, 2) + "G" + pad(gust, 2) + "KT";
+            green_div.innerText = "";
+            yellow_div.innerText = "";
+            fuel_div.innerText = "Fuel: " + fuel;
+            reveal = true;
+        }
+    }
+
+    function clamp(val, min, max) {
+        if (val < min) {
+            return min;
+        }
+        if (val > max) {
+            return max;
+        }
+        return val;
+    }
+
+    function pad(num, size) {
+        num = num.toString();
+        while (num.length < size) num = "0" + num;
+        return num;
+    }
+
+    function toggleGust() {
+        console.log("Clicked!");
+        if(gust_checked.checked) {
+            console.log("Checked");
+            wind_div.style.display = "block";
+        } else {
+            console.log("Un-checked");
+            wind_div.style.display = "none";
+        }
+    }
+</script>
+</html>
