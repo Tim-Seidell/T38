@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="num_engines" placeholder="Number of Engines">
+    <input type="text" id="num_dropping" placeholder="Number dropping">
+    <button onclick="calcEngines()">Enter</button>
+
+    <div id="solutions"></div>
+</body>
+<script>
+    var combinations = [];
+    const eng_config = [8,4,2,1];
+    const solutionDiv = document.getElementById("solutions");
+
+    function calcEngines() {
+        solutionDiv.innerHTML = "";
+
+        const total_num_engines = document.getElementById("num_engines").value;
+        const total_num_dropping = document.getElementById("num_dropping").value;
+
+        var coinTree = new CoinTree(total_num_engines, total_num_dropping, eng_config);
+        coinTree.build();
+    }
+
+    class CoinTree {
+        constructor(total_coins, max_coins, coin_list) {
+            this.total_coins = total_coins;
+            this.max_coins = max_coins;
+            this.coin_list = coin_list;
+            this.solutions = [];
+            this.head = null;
+        }
+
+        build() {
+            var path = [];
+            this.head = new CoinTreeNode(this.total_coins, this.max_coins, this.coin_list, this, path);
+            this.head.calcChildren();
+        }
+    }
+
+    class CoinTreeNode {
+        constructor(remaining, max_coins, coin_list, parent, path) {
+            this.remaining = remaining;
+            this.max_coins = max_coins;
+            this.coin_list = coin_list;
+            this.path = path;
+
+            this.children = [];
+        }
+
+        calcChildren() {
+            if(this.remaining > 0) {
+                for(var coin = 0; coin < this.coin_list.length; coin++) {
+                    this.path.push(this.coin_list[coin]);
+                    this.children.push(new CoinTreeNode(
+                        this.remaining - this.coin_list[coin],
+                        this.max_coins,
+                        this.coin_list.slice(coin, this.coin_list.length),
+                        this,
+                        this.path
+                        ).calcChildren()
+                    );
+                    this.path.pop();
+                }
+                return;
+            } else if (this.remaining == 0) {
+                if(this.path.length == this.max_coins) {
+                    const sum = this.path.reduce((partialSum, a) => partialSum + a, 0);
+                    console.log("(" + sum + ") VALID! - " + this.path);
+                    const solution = document.createElement("div");
+                    solution.innerText = this.path;
+                    solutionDiv.appendChild(solution);                 
+                }
+                return;
+            } else {
+                return;
+            }
+        }
+    }
+</script>
+</html>
